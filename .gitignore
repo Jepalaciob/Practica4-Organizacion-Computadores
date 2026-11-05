@@ -1,0 +1,11 @@
+# Material de apoyo del curso (fuera de Git)
+material/
+
+# Salidas de las pruebas y archivos temporales
+*.out
+*.tmp
+.DS_Store
+Thumbs.db
+
+# IMPORTANTE: no ignore *.vm. Grafico.vm (y Aleatorio.vm, si lo hacen) estan
+# escritos a mano y deben subirse al repositorio.
