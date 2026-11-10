@@ -1,0 +1,53 @@
+/*********
+* TipoObstaculo.jack - Configuracion de datos para cada tipo de obstaculo.
+* Permite especializar obstaculos por composicion sin usar herencia.
+* Autor: Thomas Serna Saldarriaga
+*********/
+class TipoObstaculo {
+    field int tipo;
+    field int largo;
+    field int velocidad;
+    field boolean letal;
+    field int puntos;
+
+    /** Crea la configuracion de un tipo de obstaculo. */
+    constructor TipoObstaculo new(int idTipo, int unLargo, int unaVel, boolean esLetal, int unosPuntos) {
+        let tipo = idTipo;
+        let largo = unLargo;
+        let velocidad = unaVel;
+        let letal = esLetal;
+        let puntos = unosPuntos;
+        return this;
+    }
+
+    /** Libera la configuracion de memoria. */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Codigo del tipo: 0 cono, 1 camion, 2 moto, 3 moneda. */
+    method int tipo() {
+        return tipo;
+    }
+
+    /** Cantidad de celdas horizontales que ocupa. */
+    method int largo() {
+        return largo;
+    }
+
+    /** Celdas que avanza hacia la izquierda en cada paso. */
+    method int velocidad() {
+        return velocidad;
+    }
+
+    /** Indica si al chocar quita una vida al jugador. */
+    method boolean esLetal() {
+        return letal;
+    }
+
+    /** Puntos que otorga al tocar el carro. */
+    method int puntos() {
+        return puntos;
+    }
+}

@@ -1,0 +1,89 @@
+/*********
+* Obstaculo.jack - Obstaculo activo en la via, especializado mediante TipoObstaculo.
+* Autor: Thomas Serna Saldarriaga
+*********/
+class Obstaculo {
+    field TipoObstaculo datos;
+    field int carril;
+    field int col;
+    field int colAnterior;
+
+    /** Crea un obstaculo con su celda izquierda en unaCol. */
+    constructor Obstaculo new(TipoObstaculo tipoDatos, int unCarril, int unaCol) {
+        let datos = tipoDatos;
+        let carril = unCarril;
+        let col = unaCol;
+        let colAnterior = unaCol;
+        return this;
+    }
+
+    /** Libera el obstaculo sin liberar TipoObstaculo (compartido por Carrera). */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Guarda la columna actual y avanza segun su velocidad. */
+    method void mover() {
+        let colAnterior = col;
+        let col = col - datos.velocidad();
+        return;
+    }
+
+    /** Indica si el obstaculo ocupa la celda (unCarril, unaCol). */
+    method boolean ocupaCelda(int unCarril, int unaCol) {
+        var int colFin;
+        if (~(carril = unCarril)) {
+            return false;
+        }
+        let colFin = (col + datos.largo()) - 1;
+        return (~(unaCol < col)) & (~(unaCol > colFin));
+    }
+
+    /** Indica si en este paso toco al carro en (carrilCarro, colCarro). */
+    method boolean chocaConCarro(int carrilCarro, int colCarro) {
+        var int colFinAnterior;
+        if (~(carril = carrilCarro)) {
+            return false;
+        }
+        let colFinAnterior = (colAnterior + datos.largo()) - 1;
+        return (~(colCarro < col)) & (~(colCarro > colFinAnterior));
+    }
+
+    /** Indica si salio completamente por el borde izquierdo de la pantalla. */
+    method boolean salio() {
+        var int colFin;
+        let colFin = (col + datos.largo()) - 1;
+        return colFin < 0;
+    }
+
+    /** Codigo del tipo de este obstaculo. */
+    method int tipo() {
+        return datos.tipo();
+    }
+
+    /** Carril actual del obstaculo (0, 1 o 2). */
+    method int carril() {
+        return carril;
+    }
+
+    /** Columna de la celda izquierda del obstaculo. */
+    method int col() {
+        return col;
+    }
+
+    /** Largo en celdas del obstaculo. */
+    method int largo() {
+        return datos.largo();
+    }
+
+    /** Indica si el obstaculo quita una vida al chocar. */
+    method boolean esLetal() {
+        return datos.esLetal();
+    }
+
+    /** Puntos que suma el obstaculo al tocar el carro. */
+    method int puntos() {
+        return datos.puntos();
+    }
+}
