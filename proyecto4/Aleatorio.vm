@@ -1,0 +1,27 @@
+// Aleatorio.vm - Generador pseudoaleatorio de 16 bits escrito en VM (bono).
+// Autor: Thomas Serna Saldarriaga
+// Estado x en static 0. Calcula x <- 5x + 3 usando solo sumas.
+
+// semilla(s): inicializa el estado del generador con el valor de argument 0.
+function Aleatorio.semilla 0
+push argument 0
+pop static 0
+push constant 0
+return
+
+// siguiente(): actualiza el estado x <- 5x + 3 y retorna el nuevo valor.
+function Aleatorio.siguiente 0
+push static 0
+push static 0
+add
+push static 0
+push static 0
+add
+add
+push static 0
+add
+push constant 3
+add
+pop static 0
+push static 0
+return
