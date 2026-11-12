@@ -4,11 +4,72 @@
 // No debe existir Grafico.jack. No se permite llamar a Memory.poke,
 // Memory.peek ni Math.multiply.
 
+// direccionCelda(fila, col): calcula 16384 + fila*512 + col usando sumas.
+//   argument 0 = fila (0..15), argument 1 = col (0..31).
+function Grafico.direccionCelda 2
+push constant 16384
+push argument 1
+add
+pop local 0
+push argument 0
+pop local 1
+label BUCLE_FILA
+push local 1
+push constant 0
+gt
+not
+if-goto FIN_FILA
+push local 0
+push constant 512
+add
+pop local 0
+push local 1
+push constant 1
+sub
+pop local 1
+goto BUCLE_FILA
+label FIN_FILA
+push local 0
+return
+
 // dibujarCelda(fila, col, sprite)
 //   argument 0 = fila (0..15), argument 1 = col (0..31),
 //   argument 2 = direccion del Array de 16 palabras del sprite.
 //   Linea k de la celda: RAM[16384 + fila*512 + k*32 + col] = sprite[k].
-function Grafico.dibujarCelda 0
-// COMPLETAR
+function Grafico.dibujarCelda 3
+push argument 0
+push argument 1
+call Grafico.direccionCelda 2
+pop local 0
+push argument 2
+pop local 1
+push constant 16
+pop local 2
+label BUCLE_LINEA
+push local 2
+push constant 0
+gt
+not
+if-goto FIN_LINEA
+push local 1
+pop pointer 1
+push that 0
+push local 0
+pop pointer 1
+pop that 0
+push local 1
+push constant 1
+add
+pop local 1
+push local 0
+push constant 32
+add
+pop local 0
+push local 2
+push constant 1
+sub
+pop local 2
+goto BUCLE_LINEA
+label FIN_LINEA
 push constant 0
 return
