@@ -6,7 +6,7 @@
 
 | Nombre | Usuario GitHub | Aportes principales |
 |---|---|---|
-| Thomas Serna Saldarriaga | ThomasSerna | Inicialización de la estructura del proyecto y plantilla |
+| Thomas Serna Saldarriaga | ThomasSerna | Lógica de `Carrera`, modelo de obstáculos (`TipoObstaculo`, `Obstaculo`), `Grafico.dibujarCelda` y `Aleatorio.vm` |
 | Juan Esteban Palacio | jepalaciob | Configuración del repositorio y estructura inicial |
 
 # Compilación y ejecución
@@ -40,15 +40,20 @@
 |---|---|
 | `Main` | Punto de entrada; crea el juego, lo ejecuta y lo libera. |
 | `Carrera` | Lógica pura del juego de tres carriles (separada de pantalla y teclado). |
+| `Obstaculo` | Representa un obstáculo activo en la vía (carril, columna y detección de choques/salida). |
+| `TipoObstaculo` | Almacena la configuración de cada tipo (`tipo`, `largo`, `velocidad`, `letal`, `puntos`). |
 
-*Por completar a medida que se diseñen e implementen las demás clases del juego.*
+Los 4 tipos de obstáculo (`0` cono, `1` camión, `2` moto, `3` moneda) se especializan mediante **composición y datos**: `Carrera` instancia cuatro objetos `TipoObstaculo` compartidos y cada `Obstaculo` recibe el suyo sin duplicar código ni requerir herencia. La lógica no depende de pantalla ni de teclado porque `Carrera` y sus clases asociadas no llaman a `Screen`, `Output`, `Keyboard`, `Grafico` ni `Sys.wait`.
+
+*Por completar con las clases de vista y bucle principal del juego.*
 
 # Rutinas VM
 
 <!-- Funciones escritas a mano en VM (Grafico.dibujarCelda y las de
      bonificación que hayan hecho) y dónde las usa el juego. -->
 
-- `Grafico.dibujarCelda(fila, col, sprite)` en `Grafico.vm` *(en desarrollo)*.
+- `Grafico.dibujarCelda(fila, col, sprite)` (y auxiliar `Grafico.direccionCelda`) en `Grafico.vm`: escribe las 16 palabras de un sprite directamente en la memoria de video (`16384 + fila*512 + k*32 + col`) mediante `pointer`/`that`.
+- `Aleatorio.semilla(s)` y `Aleatorio.siguiente()` en `Aleatorio.vm` (bono): generador lineal congruencial de 16 bits (`x <- 5x + 3`) usado por `Carrera` en `new` y `generar`.
 
 # Uso de IA
 
