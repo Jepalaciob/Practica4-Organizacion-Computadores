@@ -6,82 +6,338 @@
 * Autor 2: Juan Esteban Palacio
 *********/
 class Carrera {
-    // COMPLETAR: campos
+    field int carrilCarro;
+    field int cambioPendiente;
+    field int vidas;
+    field int puntaje;
+    field int progreso;
+    field int estado;
+    field int meta;
+    field Array obstaculos;
+    field int cantidad;
+    field int capacidad;
+    field Array tipos;
 
     /** Nueva carrera: carro en el carril 1, 3 vidas, puntaje 0, progreso 0,
         estado 0 y sin obstaculos. semilla inicializa el generador. */
     constructor Carrera new(int pasosMeta, int semilla) {
-        // COMPLETAR
+        let carrilCarro = 1;
+        let cambioPendiente = 0;
+        let vidas = 3;
+        let puntaje = 0;
+        let progreso = 0;
+        let estado = 0;
+        let meta = pasosMeta;
+        let cantidad = 0;
+        let capacidad = 20;
+        let obstaculos = Array.new(capacidad);
+        let tipos = Array.new(4);
+        do iniciarTipos();
+        do Aleatorio.semilla(semilla);
         return this;
+    }
+
+    /** Inicializa los 4 tipos de obstaculo por datos (cono, camion, moto, moneda). */
+    method void iniciarTipos() {
+        let tipos[0] = TipoObstaculo.new(0, 1, 1, true, 0);
+        let tipos[1] = TipoObstaculo.new(1, 3, 1, true, 0);
+        let tipos[2] = TipoObstaculo.new(2, 1, 2, true, 0);
+        let tipos[3] = TipoObstaculo.new(3, 1, 1, false, 10);
+        return;
     }
 
     /** Libera los obstaculos, los objetos internos y la carrera. */
     method void dispose() {
-        // COMPLETAR
+        var int i;
+        var Obstaculo obs;
+        var TipoObstaculo tipoObs;
+        let i = 0;
+        while (i < cantidad) {
+            let obs = obstaculos[i];
+            do obs.dispose();
+            let i = i + 1;
+        }
+        do obstaculos.dispose();
+        let i = 0;
+        while (i < 4) {
+            let tipoObs = tipos[i];
+            do tipoObs.dispose();
+            let i = i + 1;
+        }
+        do tipos.dispose();
         do Memory.deAlloc(this);
         return;
     }
 
     /** Solicita un cambio de carril: -1 sube, 1 baja (seccion 8.3). */
     method void moverCarro(int dir) {
-        // COMPLETAR
+        if (~(estado = 0)) {
+            return;
+        }
+        if ((dir = -1) | (dir = 1)) {
+            let cambioPendiente = dir;
+        }
         return;
     }
 
     /** Agrega un obstaculo del tipo dado con su celda izquierda en col. */
     method void agregarObstaculo(int tipo, int carril, int col) {
-        // COMPLETAR
+        if (~(cantidad < capacidad)) {
+            return;
+        }
+        if ((tipo < 0) | (tipo > 3)) {
+            return;
+        }
+        if ((carril < 0) | (carril > 2)) {
+            return;
+        }
+        if ((col < 0) | (col > 31)) {
+            return;
+        }
+        let obstaculos[cantidad] = Obstaculo.new(tipos[tipo], carril, col);
+        let cantidad = cantidad + 1;
         return;
     }
 
     /** Un paso del juego, en el orden de la seccion 8.3. */
     method void avanzar() {
-        // COMPLETAR
+        if (~(estado = 0)) {
+            return;
+        }
+        do aplicarCambioCarril();
+        do moverObstaculos();
+        do procesarChoques();
+        if (estado = 1) {
+            return;
+        }
+        do eliminarSalidos();
+        let progreso = progreso + 1;
+        let puntaje = puntaje + 1;
+        if (~(progreso < meta)) {
+            let estado = 2;
+        }
+        return;
+    }
+
+    /** Aplica el cambio de carril pendiente si permanece entre 0 y 2. */
+    method void aplicarCambioCarril() {
+        var int nuevoCarril;
+        let nuevoCarril = carrilCarro + cambioPendiente;
+        if ((~(nuevoCarril < 0)) & (~(nuevoCarril > 2))) {
+            let carrilCarro = nuevoCarril;
+        }
+        let cambioPendiente = 0;
+        return;
+    }
+
+    /** Mueve cada obstaculo activo hacia la izquierda segun su velocidad. */
+    method void moverObstaculos() {
+        var int i;
+        var Obstaculo obs;
+        let i = 0;
+        while (i < cantidad) {
+            let obs = obstaculos[i];
+            do obs.mover();
+            let i = i + 1;
+        }
+        return;
+    }
+
+    /** Revisa choques en la columna 2 y actualiza vidas, puntaje y estado. */
+    method void procesarChoques() {
+        var int i;
+        var Obstaculo obs;
+        let i = 0;
+        while (i < cantidad) {
+            let obs = obstaculos[i];
+            if (obs.chocaConCarro(carrilCarro, 2)) {
+                do aplicarEfectoChoque(obs);
+                do eliminarObstaculoEn(i);
+                if (vidas = 0) {
+                    let estado = 1;
+                    return;
+                }
+            } else {
+                let i = i + 1;
+            }
+        }
+        return;
+    }
+
+    /** Resta una vida si el obstaculo es letal o suma puntos si es moneda. */
+    method void aplicarEfectoChoque(Obstaculo obs) {
+        if (obs.esLetal()) {
+            let vidas = vidas - 1;
+        } else {
+            let puntaje = puntaje + obs.puntos();
+        }
+        return;
+    }
+
+    /** Elimina los obstaculos que salieron por completo por la izquierda. */
+    method void eliminarSalidos() {
+        var int i;
+        var Obstaculo obs;
+        let i = 0;
+        while (i < cantidad) {
+            let obs = obstaculos[i];
+            if (obs.salio()) {
+                do eliminarObstaculoEn(i);
+            } else {
+                let i = i + 1;
+            }
+        }
+        return;
+    }
+
+    /** Libera el obstaculo en indice y compacta el arreglo activo. */
+    method void eliminarObstaculoEn(int indice) {
+        var Obstaculo obs;
+        let obs = obstaculos[indice];
+        do obs.dispose();
+        let cantidad = cantidad - 1;
+        if (indice < cantidad) {
+            let obstaculos[indice] = obstaculos[cantidad];
+        }
+        let obstaculos[cantidad] = null;
         return;
     }
 
     /** Agrega a lo sumo un obstaculo en la columna 31 (seccion 8.4). */
     method void generar() {
-        // COMPLETAR
+        var int probabilidad, carrilBase, tipo, intento, carril;
+        if ((~(estado = 0)) | (~(cantidad < capacidad))) {
+            return;
+        }
+        let probabilidad = azarEntre(10);
+        if (probabilidad > 3) {
+            return;
+        }
+        let carrilBase = azarEntre(3);
+        let tipo = azarEntre(4);
+        let intento = 0;
+        while (intento < 3) {
+            let carril = carrilBase + intento;
+            if (carril > 2) {
+                let carril = carril - 3;
+            }
+            if (puedeAgregarEn(tipo, carril)) {
+                do agregarObstaculo(tipo, carril, 31);
+                return;
+            }
+            let intento = intento + 1;
+        }
         return;
+    }
+
+    /** Retorna un entero pseudoaleatorio entre 0 y limite - 1. */
+    method int azarEntre(int limite) {
+        var int valor, cociente;
+        let valor = Aleatorio.siguiente() & 32767;
+        let valor = valor / 64;
+        let cociente = valor / limite;
+        return valor - (cociente * limite);
+    }
+
+    /** Verifica si la columna 31 esta libre y cumple la regla de paso libre. */
+    method boolean puedeAgregarEn(int tipo, int carril) {
+        if (~(ocupada(carril, 31) = -1)) {
+            return false;
+        }
+        if (tipo < 3) {
+            return puedePonerLetal(carril);
+        }
+        return true;
+    }
+
+    /** Verifica que los otros dos carriles no bloqueen el paso en 26..31. */
+    method boolean puedePonerLetal(int carril) {
+        var int c, bloqueados;
+        let c = 0;
+        let bloqueados = 0;
+        while (c < 3) {
+            if (~(c = carril)) {
+                if (tieneLetalEnZona(c)) {
+                    let bloqueados = bloqueados + 1;
+                }
+            }
+            let c = c + 1;
+        }
+        return bloqueados < 2;
+    }
+
+    /** Indica si un carril tiene un obstaculo letal entre las columnas 26 y 31. */
+    method boolean tieneLetalEnZona(int carril) {
+        var int col, tipo;
+        let col = 26;
+        while (~(col > 31)) {
+            let tipo = ocupada(carril, col);
+            if ((tipo > -1) & (tipo < 3)) {
+                return true;
+            }
+            let col = col + 1;
+        }
+        return false;
     }
 
     /** Carril del carro: 0, 1 o 2. */
     method int carrilCarro() {
-        // COMPLETAR
-        return 1;
+        return carrilCarro;
     }
 
     /** Tipo del obstaculo que ocupa (carril, col), o -1 si esta libre. */
     method int ocupada(int carril, int col) {
-        // COMPLETAR
+        var int i;
+        var Obstaculo obs;
+        if ((carril < 0) | (carril > 2)) {
+            return -1;
+        }
+        if ((col < 0) | (col > 31)) {
+            return -1;
+        }
+        let i = 0;
+        while (i < cantidad) {
+            let obs = obstaculos[i];
+            if (obs.ocupaCelda(carril, col)) {
+                return obs.tipo();
+            }
+            let i = i + 1;
+        }
         return -1;
     }
 
+    /** Vidas restantes del jugador. */
     method int vidas() {
-        // COMPLETAR
-        return 3;
+        return vidas;
     }
 
+    /** Puntaje acumulado de la carrera. */
     method int puntaje() {
-        // COMPLETAR
-        return 0;
+        return puntaje;
     }
 
+    /** Pasos completados hacia la meta. */
     method int progreso() {
-        // COMPLETAR
-        return 0;
+        return progreso;
     }
 
     /** 0 jugando, 1 derrota, 2 victoria. */
     method int estado() {
-        // COMPLETAR
-        return 0;
+        return estado;
     }
 
     /** Cantidad de obstaculos activos. */
     method int cantidad() {
-        // COMPLETAR
-        return 0;
+        return cantidad;
+    }
+
+    /** Cantidad total de pasos necesarios para ganar. */
+    method int pasosMeta() {
+        return meta;
+    }
+
+    /** Retorna el obstaculo activo en la posicion indice para uso de la vista. */
+    method Obstaculo obstaculoEn(int indice) {
+        return obstaculos[indice];
     }
 }
