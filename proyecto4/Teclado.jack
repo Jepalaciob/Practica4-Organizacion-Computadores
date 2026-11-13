@@ -1,0 +1,82 @@
+/*********
+* Teclado.jack - Lee el teclado sin detener el juego y detecta pulsaciones
+* nuevas: mantener una tecla presionada cuenta como una sola pulsacion.
+* Autor: Juan Esteban Palacio Betancur
+*********/
+class Teclado {
+    field int anterior;
+    field int pulsada;
+
+    /** Crea el lector de teclado sin pulsaciones guardadas. */
+    constructor Teclado new() {
+        let anterior = 0;
+        let pulsada = 0;
+        return this;
+    }
+
+    /** Espera los milisegundos dados revisando el teclado cada 10 ms, para no
+        perder pulsaciones cortas. Guarda la primera tecla presionada en ese
+        tiempo; las consultas presiono...() responden sobre ella. */
+    method void leerDurante(int milisegundos) {
+        var int restante;
+        let pulsada = 0;
+        let restante = milisegundos;
+        while (restante > 0) {
+            do revisar();
+            do Sys.wait(10);
+            let restante = restante - 10;
+        }
+        return;
+    }
+
+    /** Guarda la tecla actual si se acaba de presionar (es distinta a la de la
+        lectura anterior) y todavia no hay otra guardada. */
+    method void revisar() {
+        var int actual;
+        let actual = Keyboard.keyPressed();
+        if ((pulsada = 0) & (~(actual = anterior))) {
+            let pulsada = actual;
+        }
+        let anterior = actual;
+        return;
+    }
+
+    /** Libera el lector de teclado. */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Flecha arriba (131): subir de carril. */
+    method boolean presionoArriba() {
+        return pulsada = 131;
+    }
+
+    /** Flecha abajo (133): bajar de carril. */
+    method boolean presionoAbajo() {
+        return pulsada = 133;
+    }
+
+    /** P (80) o p (112): pausar y continuar. */
+    method boolean presionoPausa() {
+        return (pulsada = 80) | (pulsada = 112);
+    }
+
+    /** R (82) o r (114): volver a la pantalla inicial. */
+    method boolean presionoReinicio() {
+        return (pulsada = 82) | (pulsada = 114);
+    }
+
+    /** ESC (140): salir del juego. */
+    method boolean presionoSalida() {
+        return pulsada = 140;
+    }
+
+    /** 1, 2 o 3 si se presiono esa tecla numerica (codigos 49 a 51); si no, 0. */
+    method int opcionElegida() {
+        if ((pulsada < 49) | (pulsada > 51)) {
+            return 0;
+        }
+        return pulsada - 48;
+    }
+}
