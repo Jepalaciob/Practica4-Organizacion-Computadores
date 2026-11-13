@@ -1,6 +1,6 @@
-// Grafico.vm - Rutinas graficas escritas a mano en lenguaje VM (seccion 9).
+// Grafico.vm - Rutinas graficas escritas a mano en lenguaje VM (secciones 9 y 10).
 // Autor 1: Thomas Serna Saldarriaga
-// Autor 2: Juan Esteban Palacio
+// Autor 2: Juan Esteban Palacio Betancur
 // No debe existir Grafico.jack. No se permite llamar a Memory.poke,
 // Memory.peek ni Math.multiply.
 
@@ -71,5 +71,104 @@ sub
 pop local 2
 goto BUCLE_LINEA
 label FIN_LINEA
+push constant 0
+return
+
+// borrarCelda(fila, col): pone en 0 las 16 palabras de la celda.
+//   local 0 = direccion de la linea actual,
+//   local 1 = direccion donde termina la celda (16 lineas * 32 = 512 palabras).
+function Grafico.borrarCelda 2
+push argument 0
+push argument 1
+call Grafico.direccionCelda 2
+pop local 0
+push local 0
+push constant 512
+add
+pop local 1
+label BORRAR_LINEA
+push local 0
+push local 1
+lt
+not
+if-goto FIN_BORRAR
+push local 0
+pop pointer 1
+push constant 0
+pop that 0
+push local 0
+push constant 32
+add
+pop local 0
+goto BORRAR_LINEA
+label FIN_BORRAR
+push constant 0
+return
+
+// desplazarFila(fila): en cada una de las 16 lineas de la fila de celdas
+//   rota las 32 palabras una posicion a la izquierda (ver rotarLinea).
+//   local 0 = numero de la linea (0..15), local 1 = direccion de la linea.
+function Grafico.desplazarFila 2
+push argument 0
+push constant 0
+call Grafico.direccionCelda 2
+pop local 1
+push constant 0
+pop local 0
+label DESPLAZAR_LINEA
+push local 0
+push constant 16
+lt
+not
+if-goto FIN_DESPLAZAR
+push local 1
+call Grafico.rotarLinea 1
+pop temp 0
+push local 1
+push constant 32
+add
+pop local 1
+push local 0
+push constant 1
+add
+pop local 0
+goto DESPLAZAR_LINEA
+label FIN_DESPLAZAR
+push constant 0
+return
+
+// rotarLinea(direccion): rota una posicion a la izquierda las 32 palabras
+//   w[0..31] que empiezan en direccion: w[c] <- w[c+1] y w[31] <- w[0].
+//   local 0 = direccion de w[c], local 1 = copia de w[0].
+//   Con THAT en w[c], "that 1" es w[c+1] y "that 0" es w[c].
+function Grafico.rotarLinea 2
+push argument 0
+pop pointer 1
+push that 0
+pop local 1
+push argument 0
+pop local 0
+label CORRER_PALABRA
+push local 0
+push argument 0
+push constant 31
+add
+lt
+not
+if-goto FIN_CORRER
+push local 0
+pop pointer 1
+push that 1
+pop that 0
+push local 0
+push constant 1
+add
+pop local 0
+goto CORRER_PALABRA
+label FIN_CORRER
+push local 0
+pop pointer 1
+push local 1
+pop that 0
 push constant 0
 return
