@@ -1,0 +1,265 @@
+/*********
+* Sprites.jack - Dibujos de 16 x 16 pixeles del carro, los obstaculos, la via
+* y la barra de progreso. Cada sprite es un Array de 16 palabras (una por
+* linea) que se crea una sola vez y se entrega a Grafico.dibujarCelda.
+* En cada palabra el bit 0 es el pixel de la izquierda. El comentario de cada
+* linea muestra el dibujo (# = pixel negro); las lineas sin asignar quedan en 0.
+* Autor: Juan Esteban Palacio Betancur
+*********/
+class Sprites {
+    field Array carro, cono, camionCabina, camionCarga, moto, moneda;
+    field Array borde, divisoria, barraVacia, barraLlena;
+
+    /** Crea todos los sprites del juego. */
+    constructor Sprites new() {
+        let carro = crearCarro();
+        let cono = crearCono();
+        let camionCabina = crearCamionCabina();
+        let camionCarga = crearCamionCarga();
+        let moto = crearMoto();
+        let moneda = crearMoneda();
+        let borde = crearBorde();
+        let divisoria = crearDivisoria();
+        let barraVacia = crearBarraVacia();
+        let barraLlena = crearBarraLlena();
+        return this;
+    }
+
+    /** Libera cada sprite y el objeto. */
+    method void dispose() {
+        do carro.dispose();
+        do cono.dispose();
+        do camionCabina.dispose();
+        do camionCarga.dispose();
+        do moto.dispose();
+        do moneda.dispose();
+        do borde.dispose();
+        do divisoria.dispose();
+        do barraVacia.dispose();
+        do barraLlena.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Sprite de una parte (0 a largo - 1) de un obstaculo segun su tipo:
+        0 cono, 1 camion (cabina en la parte 0 y carga en las demas), 2 moto
+        y 3 moneda. */
+    method Array deObstaculo(int tipo, int parte) {
+        if (tipo = 0) {
+            return cono;
+        }
+        if (tipo = 1) {
+            if (parte = 0) {
+                return camionCabina;
+            }
+            return camionCarga;
+        }
+        if (tipo = 2) {
+            return moto;
+        }
+        return moneda;
+    }
+
+    /** Carro del jugador. */
+    method Array carro() {
+        return carro;
+    }
+
+    /** Tramo del borde de la via. */
+    method Array borde() {
+        return borde;
+    }
+
+    /** Trazo de una linea divisoria de carriles. */
+    method Array divisoria() {
+        return divisoria;
+    }
+
+    /** Celda de la barra de progreso que aun no se recorre. */
+    method Array barraVacia() {
+        return barraVacia;
+    }
+
+    /** Celda de la barra de progreso ya recorrida. */
+    method Array barraLlena() {
+        return barraLlena;
+    }
+
+    /** Crea un sprite en blanco: 16 palabras en 0. */
+    method Array nuevoSprite() {
+        var Array s;
+        var int linea;
+        let s = Array.new(16);
+        let linea = 0;
+        while (linea < 16) {
+            let s[linea] = 0;
+            let linea = linea + 1;
+        }
+        return s;
+    }
+
+    /** Carro del jugador visto de lado, mirando a la derecha. */
+    method Array crearCarro() {
+        var Array s;
+        let s = nuevoSprite();
+        let s[3] = 992;         // .....#####......
+        let s[4] = 1168;        // ....#..#..#.....
+        let s[5] = 2184;        // ...#...#...#....
+        let s[6] = 8190;        // .############...
+        let s[7] = 16385;       // #.............#.
+        let s[8] = -32767;      // #..............#
+        let s[9] = -32767;      // #..............#
+        let s[10] = -1;         // ################
+        let s[11] = 12300;      // ..##........##..
+        let s[12] = 30750;      // .####......####.
+        let s[13] = 30750;      // .####......####.
+        let s[14] = 12300;      // ..##........##..
+        return s;
+    }
+
+    /** Cono de transito. */
+    method Array crearCono() {
+        var Array s;
+        let s = nuevoSprite();
+        let s[1] = 384;         // .......##.......
+        let s[2] = 384;         // .......##.......
+        let s[3] = 960;         // ......####......
+        let s[4] = 576;         // ......#..#......
+        let s[5] = 960;         // ......####......
+        let s[6] = 2016;        // .....######.....
+        let s[7] = 1056;        // .....#....#.....
+        let s[8] = 2016;        // .....######.....
+        let s[9] = 4080;        // ....########....
+        let s[10] = 2064;       // ....#......#....
+        let s[11] = 4080;       // ....########....
+        let s[12] = 8184;       // ...##########...
+        let s[13] = 16380;      // ..############..
+        let s[14] = 16380;      // ..############..
+        return s;
+    }
+
+    /** Cabina del camion: va adelante (a la izquierda) porque avanza hacia la izquierda. */
+    method Array crearCamionCabina() {
+        var Array s;
+        let s = nuevoSprite();
+        let s[2] = -64;         // ......##########
+        let s[3] = -32480;      // .....#..#......#
+        let s[4] = -32496;      // ....#...#......#
+        let s[5] = -32504;      // ...#....#......#
+        let s[6] = -32260;      // ..#######......#
+        let s[7] = -32766;      // .#.............#
+        let s[8] = -32766;      // .#.............#
+        let s[9] = -32766;      // .#.............#
+        let s[10] = -2;         // .###############
+        let s[11] = 56;         // ...###..........
+        let s[12] = 124;        // ..#####.........
+        let s[13] = 124;        // ..#####.........
+        let s[14] = 56;         // ...###..........
+        return s;
+    }
+
+    /** Carga del camion: ocupa las dos celdas de atras. */
+    method Array crearCamionCarga() {
+        var Array s;
+        let s = nuevoSprite();
+        let s[1] = -1;          // ################
+        let s[2] = -32767;      // #..............#
+        let s[3] = -16387;      // #.############.#
+        let s[4] = -24571;      // #.#..........#.#
+        let s[5] = -24571;      // #.#..........#.#
+        let s[6] = -24571;      // #.#..........#.#
+        let s[7] = -24571;      // #.#..........#.#
+        let s[8] = -24571;      // #.#..........#.#
+        let s[9] = -16387;      // #.############.#
+        let s[10] = -1;         // ################
+        let s[11] = 3584;       // .........###....
+        let s[12] = 7936;       // ........#####...
+        let s[13] = 7936;       // ........#####...
+        let s[14] = 3584;       // .........###....
+        return s;
+    }
+
+    /** Moto con su conductor, mirando a la izquierda. */
+    method Array crearMoto() {
+        var Array s;
+        let s = nuevoSprite();
+        let s[2] = 768;         // ........##......
+        let s[3] = 768;         // ........##......
+        let s[4] = 896;         // .......###......
+        let s[5] = 248;         // ...#####........
+        let s[6] = 900;         // ..#....###......
+        let s[7] = 1920;        // .......####.....
+        let s[8] = 16380;       // ..############..
+        let s[9] = 28686;       // .###........###.
+        let s[10] = -30703;     // #...#......#...#
+        let s[11] = -22507;     // #.#.#......#.#.#
+        let s[12] = -30703;     // #...#......#...#
+        let s[13] = 28686;      // .###........###.
+        return s;
+    }
+
+    /** Moneda con el signo $. */
+    method Array crearMoneda() {
+        var Array s;
+        let s = nuevoSprite();
+        let s[2] = 2016;        // .....######.....
+        let s[3] = 2064;        // ....#......#....
+        let s[4] = 4488;        // ...#...##...#...
+        let s[5] = 9156;        // ..#...####...#..
+        let s[6] = 8292;        // ..#..##......#..
+        let s[7] = 8644;        // ..#...###....#..
+        let s[8] = 8964;        // ..#.....##...#..
+        let s[9] = 9732;        // ..#......##..#..
+        let s[10] = 8676;       // ..#..####....#..
+        let s[11] = 4488;       // ...#...##...#...
+        let s[12] = 2064;       // ....#......#....
+        let s[13] = 2016;       // .....######.....
+        return s;
+    }
+
+    /** Borde de la via con franjas, como un bordillo. */
+    method Array crearBorde() {
+        var Array s;
+        let s = nuevoSprite();
+        let s[6] = -1;          // ################
+        let s[7] = 255;         // ########........
+        let s[8] = -256;        // ........########
+        let s[9] = -1;          // ################
+        return s;
+    }
+
+    /** Trazo de linea divisoria; se dibuja en columnas alternas para que se vea punteada. */
+    method Array crearDivisoria() {
+        var Array s;
+        let s = nuevoSprite();
+        let s[7] = -1;          // ################
+        let s[8] = -1;          // ################
+        return s;
+    }
+
+    /** Celda vacia de la barra de progreso: solo el borde de arriba y el de abajo. */
+    method Array crearBarraVacia() {
+        var Array s;
+        let s = nuevoSprite();
+        let s[3] = -1;          // ################
+        let s[12] = -1;         // ################
+        return s;
+    }
+
+    /** Celda llena de la barra de progreso. */
+    method Array crearBarraLlena() {
+        var Array s;
+        let s = nuevoSprite();
+        let s[3] = -1;          // ################
+        let s[4] = -1;          // ################
+        let s[5] = -1;          // ################
+        let s[6] = -1;          // ################
+        let s[7] = -1;          // ################
+        let s[8] = -1;          // ################
+        let s[9] = -1;          // ################
+        let s[10] = -1;         // ################
+        let s[11] = -1;         // ################
+        let s[12] = -1;         // ################
+        return s;
+    }
+}
