@@ -1,0 +1,226 @@
+/*********
+* Vista.jack - Presentacion del juego: pantallas de texto, via, carro,
+* obstaculos, marcador y barra de progreso. Solo lee el estado de la Carrera,
+* nunca lo cambia, y en cada paso redibuja unicamente lo que se mueve.
+* Pantalla en celdas de 16 x 16: marcador (filas 0-1), barra (2), bordes
+* (4 y 10), carriles (5, 7, 9), divisorias (6 y 8) y mensajes (11-15).
+* Autor: Juan Esteban Palacio Betancur
+*********/
+class Vista {
+    field Sprites sprites;
+    field int celdasBarra;
+
+    /** Crea la vista con sus sprites. */
+    constructor Vista new() {
+        let sprites = Sprites.new();
+        let celdasBarra = 0;
+        return this;
+    }
+
+    /** Libera los sprites y la vista. */
+    method void dispose() {
+        do sprites.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Pantalla inicial: titulo, reglas, controles y distancias de la meta. */
+    method void mostrarInicio() {
+        do Screen.clearScreen();
+        do escribir(2, 20, "CARRERA DE TRES CARRILES");
+        do escribir(5, 6, "Esquiva conos, camiones y motos cambiando de carril.");
+        do escribir(6, 6, "Cada choque quita una de tus 3 vidas.");
+        do escribir(7, 6, "Cada paso suma 1 punto y cada moneda suma 10.");
+        do escribirControles(10);
+        do escribir(14, 6, "Elige la distancia a la meta:");
+        do escribir(16, 10, "1 - Corta (100 pasos)");
+        do escribir(17, 10, "2 - Media (200 pasos)");
+        do escribir(18, 10, "3 - Larga (300 pasos)");
+        return;
+    }
+
+    /** Pantalla de la carrera: marcador, barra vacia, via, carro y controles. */
+    method void mostrarCarrera(Carrera carrera) {
+        do Screen.clearScreen();
+        do dibujarBarraVacia();
+        do dibujarVia();
+        do escribirControles(17);
+        do dibujarMovibles(carrera);
+        do actualizarMarcador(carrera);
+        return;
+    }
+
+    /** Borra el carro y los obstaculos de sus celdas actuales, antes de un paso. */
+    method void borrarMovibles(Carrera carrera) {
+        do Grafico.borrarCelda(filaDeCarril(carrera.carrilCarro()), 2);
+        do pintarObstaculos(carrera, true);
+        return;
+    }
+
+    /** Redibuja despues de un paso: corre las divisorias una celda para que la
+        via parezca moverse, dibuja carro y obstaculos y actualiza el marcador. */
+    method void dibujarPaso(Carrera carrera) {
+        do Grafico.desplazarFila(6);
+        do Grafico.desplazarFila(8);
+        do dibujarMovibles(carrera);
+        do actualizarMarcador(carrera);
+        return;
+    }
+
+    /** Muestra u oculta el aviso de pausa. */
+    method void mostrarPausa(boolean pausado) {
+        if (pausado) {
+            do escribir(20, 6, "PAUSA: presiona P para continuar");
+        } else {
+            do borrarRenglon(20);
+        }
+        return;
+    }
+
+    /** Muestra si se gano o se perdio, el puntaje final y como seguir. */
+    method void mostrarResultado(Carrera carrera) {
+        if (carrera.estado() = 2) {
+            do escribir(20, 6, "VICTORIA! Llegaste a la meta.");
+        } else {
+            do escribir(20, 6, "DERROTA. Te quedaste sin vidas.");
+        }
+        do escribir(21, 6, "Puntaje final: ");
+        do Output.printInt(carrera.puntaje());
+        do escribir(22, 6, "R: jugar de nuevo   ESC: salir");
+        return;
+    }
+
+    /** Pantalla final al salir con ESC. */
+    method void mostrarDespedida() {
+        do Screen.clearScreen();
+        do escribir(11, 23, "Gracias por jugar!");
+        return;
+    }
+
+    /** Escribe las teclas del juego en dos filas de texto desde la fila dada. */
+    method void escribirControles(int fila) {
+        do escribir(fila, 6, "Flechas arriba/abajo: cambiar de carril");
+        do escribir(fila + 1, 6, "P: pausar/continuar   R: volver al inicio   ESC: salir");
+        return;
+    }
+
+    /** Escribe vidas, puntaje, pasos y meta en la fila 0 y avanza la barra. */
+    method void actualizarMarcador(Carrera carrera) {
+        do escribirDato(2, "Vidas: ", carrera.vidas());
+        do escribirDato(16, "Puntaje: ", carrera.puntaje());
+        do escribirDato(34, "Pasos: ", carrera.progreso());
+        do escribirDato(50, "Meta: ", carrera.pasosMeta());
+        do avanzarBarra(carrera.progreso(), carrera.pasosMeta());
+        return;
+    }
+
+    /** Escribe una etiqueta y su valor en la fila 0, desde la columna dada. */
+    method void escribirDato(int col, String etiqueta, int valor) {
+        do escribir(0, col, etiqueta);
+        do Output.printInt(valor);
+        return;
+    }
+
+    /** Dibuja la barra de progreso vacia en la fila 2. */
+    method void dibujarBarraVacia() {
+        var int col;
+        let col = 0;
+        while (col < 32) {
+            do Grafico.dibujarCelda(2, col, sprites.barraVacia());
+            let col = col + 1;
+        }
+        let celdasBarra = 0;
+        return;
+    }
+
+    /** Llena la barra hasta la celda que corresponde al progreso; solo dibuja
+        las celdas que se llenaron desde el paso anterior. */
+    method void avanzarBarra(int progreso, int meta) {
+        var int celdasLlenas;
+        let celdasLlenas = (progreso * 32) / meta;
+        while (celdasBarra < celdasLlenas) {
+            do Grafico.dibujarCelda(2, celdasBarra, sprites.barraLlena());
+            let celdasBarra = celdasBarra + 1;
+        }
+        return;
+    }
+
+    /** Dibuja los bordes de la via (filas 4 y 10) y las lineas divisorias
+        (filas 6 y 8), estas con un trazo en cada columna par. */
+    method void dibujarVia() {
+        var int col;
+        let col = 0;
+        while (col < 32) {
+            do Grafico.dibujarCelda(4, col, sprites.borde());
+            do Grafico.dibujarCelda(10, col, sprites.borde());
+            if ((col & 1) = 0) {
+                do Grafico.dibujarCelda(6, col, sprites.divisoria());
+                do Grafico.dibujarCelda(8, col, sprites.divisoria());
+            }
+            let col = col + 1;
+        }
+        return;
+    }
+
+    /** Dibuja los obstaculos y el carro, que siempre esta en la columna 2. */
+    method void dibujarMovibles(Carrera carrera) {
+        do pintarObstaculos(carrera, false);
+        do Grafico.dibujarCelda(filaDeCarril(carrera.carrilCarro()), 2, sprites.carro());
+        return;
+    }
+
+    /** Borra (si borrar es true) o dibuja todos los obstaculos activos. */
+    method void pintarObstaculos(Carrera carrera, boolean borrar) {
+        var int i;
+        let i = 0;
+        while (i < carrera.cantidad()) {
+            do pintarObstaculo(carrera.obstaculoEn(i), borrar);
+            let i = i + 1;
+        }
+        return;
+    }
+
+    /** Borra o dibuja cada celda del obstaculo que esta dentro de la pantalla
+        (columnas 0 a 31): un camion puede estar entrando o saliendo. */
+    method void pintarObstaculo(Obstaculo obs, boolean borrar) {
+        var int fila, parte, col;
+        let fila = filaDeCarril(obs.carril());
+        let parte = 0;
+        while (parte < obs.largo()) {
+            let col = obs.col() + parte;
+            if ((col > -1) & (col < 32)) {
+                if (borrar) {
+                    do Grafico.borrarCelda(fila, col);
+                } else {
+                    do Grafico.dibujarCelda(fila, col, sprites.deObstaculo(obs.tipo(), parte));
+                }
+            }
+            let parte = parte + 1;
+        }
+        return;
+    }
+
+    /** Fila de celdas de un carril: 5 (arriba), 7 (medio) o 9 (abajo). */
+    method int filaDeCarril(int carril) {
+        return 5 + (carril * 2);
+    }
+
+    /** Escribe el texto en la fila y columna de caracteres dadas y lo libera,
+        porque cada literal "..." crea un String nuevo en el heap. */
+    method void escribir(int fila, int col, String texto) {
+        do Output.moveCursor(fila, col);
+        do Output.printString(texto);
+        do texto.dispose();
+        return;
+    }
+
+    /** Borra una fila de texto completa (cada una mide 11 pixeles de alto). */
+    method void borrarRenglon(int fila) {
+        var int y;
+        let y = fila * 11;
+        do Screen.setColor(false);
+        do Screen.drawRectangle(0, y, 511, y + 10);
+        do Screen.setColor(true);
+        return;
+    }
+}
