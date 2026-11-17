@@ -1,0 +1,131 @@
+/*********
+* Juego.jack - Controla el flujo del juego: pantalla inicial, bucle de la
+* carrera con el teclado, pausa, reinicio, resultado y salida. Une la logica
+* (Carrera) con la presentacion (Vista) y la entrada (Teclado).
+* Autor: Juan Esteban Palacio Betancur
+*********/
+class Juego {
+    field Vista vista;
+    field Teclado teclado;
+    field Carrera carrera;
+    field int milisegundosPorPaso;
+    field int semilla;
+    field boolean pausado;
+    field boolean reiniciar;
+    field boolean salir;
+
+    /** Crea la vista y el teclado; cada partida crea su propia Carrera. */
+    constructor Juego new() {
+        let vista = Vista.new();
+        let teclado = Teclado.new();
+        let milisegundosPorPaso = 50;
+        let semilla = 0;
+        let salir = false;
+        return this;
+    }
+
+    /** Libera la vista, el teclado y el juego. */
+    method void dispose() {
+        do vista.dispose();
+        do teclado.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Juega partidas hasta que el jugador presiona ESC. */
+    method void ejecutar() {
+        var int pasosMeta;
+        while (~salir) {
+            let pasosMeta = elegirMeta();
+            if (~salir) {
+                do jugarPartida(pasosMeta);
+            }
+        }
+        do vista.mostrarDespedida();
+        return;
+    }
+
+    /** Muestra la pantalla inicial y espera 1, 2 o 3, que dan una meta de
+        100, 200 o 300 pasos. Mientras espera cambia la semilla, asi cada
+        partida tiene obstaculos distintos. */
+    method int elegirMeta() {
+        var int opcion;
+        do vista.mostrarInicio();
+        let opcion = 0;
+        while ((opcion = 0) & (~salir)) {
+            do teclado.leerDurante(milisegundosPorPaso);
+            let semilla = semilla + 1;
+            let opcion = teclado.opcionElegida();
+            let salir = teclado.presionoSalida();
+        }
+        return opcion * 100;
+    }
+
+    /** Juega una carrera hasta que termina, se reinicia con R o se sale con ESC.
+        El bucle no se detiene a esperar teclas: lee el teclado mientras espera
+        el tiempo de cada paso. */
+    method void jugarPartida(int pasosMeta) {
+        let carrera = Carrera.new(pasosMeta, semilla);
+        let pausado = false;
+        let reiniciar = false;
+        do vista.mostrarCarrera(carrera);
+        while (sigueCarrera()) {
+            do teclado.leerDurante(milisegundosPorPaso);
+            do atenderTeclas();
+            if (sigueCarrera() & (~pausado)) {
+                do jugarPaso();
+            }
+        }
+        if (~(carrera.estado() = 0)) {
+            do vista.mostrarResultado(carrera);
+            do esperarDecision();
+        }
+        do carrera.dispose();
+        return;
+    }
+
+    /** Indica si la carrera sigue: nadie gano ni perdio y no se presiono R ni ESC. */
+    method boolean sigueCarrera() {
+        return (carrera.estado() = 0) & (~reiniciar) & (~salir);
+    }
+
+    /** Atiende la tecla presionada: P pausa o continua, las flechas cambian de
+        carril (si no hay pausa), R vuelve al inicio y ESC sale. */
+    method void atenderTeclas() {
+        if (teclado.presionoPausa()) {
+            let pausado = ~pausado;
+            do vista.mostrarPausa(pausado);
+        }
+        if (teclado.presionoArriba() & (~pausado)) {
+            do carrera.moverCarro(-1);
+        }
+        if (teclado.presionoAbajo() & (~pausado)) {
+            do carrera.moverCarro(1);
+        }
+        let reiniciar = teclado.presionoReinicio();
+        let salir = teclado.presionoSalida();
+        return;
+    }
+
+    /** Un paso de la carrera: borra lo que se mueve, avanza la logica, agrega a
+        lo sumo un obstaculo nuevo y vuelve a dibujar. */
+    method void jugarPaso() {
+        do vista.borrarMovibles(carrera);
+        do carrera.avanzar();
+        do carrera.generar();
+        do vista.dibujarPaso(carrera);
+        return;
+    }
+
+    /** Despues del resultado espera R (jugar de nuevo) o ESC (salir). */
+    method void esperarDecision() {
+        var boolean decidido;
+        let decidido = false;
+        while (~decidido) {
+            do teclado.leerDurante(milisegundosPorPaso);
+            let salir = teclado.presionoSalida();
+            let decidido = salir | teclado.presionoReinicio();
+        }
+        return;
+    }
+}

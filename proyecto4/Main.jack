@@ -3,11 +3,15 @@
 * lo libera: ninguna otra clase puede llamar a Main, porque las pruebas
 * reemplazan este archivo.
 * Autor 1: Thomas Serna Saldarriaga
-* Autor 2: Juan Esteban Palacio
+* Autor 2: Juan Esteban Palacio Betancur
 *********/
 class Main {
+    /** Crea el juego, lo ejecuta hasta que el jugador sale con ESC y lo libera. */
     function void main() {
-        // COMPLETAR: crear el objeto que controla el juego y ejecutarlo
+        var Juego juego;
+        let juego = Juego.new();
+        do juego.ejecutar();
+        do juego.dispose();
         return;
     }
 }
