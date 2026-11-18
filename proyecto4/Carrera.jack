@@ -1,9 +1,9 @@
 /*********
 * Carrera.jack - Logica del juego de carriles (seccion 8 del enunciado).
-* No puede usar Screen, Output, Keyboard, Grafico ni Sys.wait, ni
-* directamente ni a traves de las clases que use.
+* No dibuja, no lee el teclado ni hace esperas, ni directamente ni a traves
+* de las clases que usa: eso lo hacen Vista, Teclado y Juego.
 * Autor 1: Thomas Serna Saldarriaga
-* Autor 2: Juan Esteban Palacio
+* Autor 2: Juan Esteban Palacio Betancur
 *********/
 class Carrera {
     field int carrilCarro;
@@ -174,18 +174,19 @@ class Carrera {
         return;
     }
 
-    /** Elimina los obstaculos que salieron por completo por la izquierda. */
+    /** Elimina los obstaculos que salieron por completo por la izquierda.
+        Recorre de atras hacia adelante: al eliminar, el ultimo obstaculo
+        (ya revisado) pasa a ocupar la posicion liberada. */
     method void eliminarSalidos() {
         var int i;
         var Obstaculo obs;
-        let i = 0;
-        while (i < cantidad) {
+        let i = cantidad - 1;
+        while (i > -1) {
             let obs = obstaculos[i];
             if (obs.salio()) {
                 do eliminarObstaculoEn(i);
-            } else {
-                let i = i + 1;
             }
+            let i = i - 1;
         }
         return;
     }

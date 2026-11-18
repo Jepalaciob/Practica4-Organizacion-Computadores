@@ -20,12 +20,6 @@ class TipoObstaculo {
         return this;
     }
 
-    /** Libera la configuracion de memoria. */
-    method void dispose() {
-        do Memory.deAlloc(this);
-        return;
-    }
-
     /** Codigo del tipo: 0 cono, 1 camion, 2 moto, 3 moneda. */
     method int tipo() {
         return tipo;
@@ -49,5 +43,11 @@ class TipoObstaculo {
     /** Puntos que otorga al tocar el carro. */
     method int puntos() {
         return puntos;
+    }
+
+    /** Libera la configuracion de memoria. */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
     }
 }
