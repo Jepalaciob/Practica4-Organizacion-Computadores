@@ -18,7 +18,7 @@ class Juego {
     constructor Juego new() {
         let vista = Vista.new();
         let teclado = Teclado.new();
-        let milisegundosPorPaso = 50;
+        let milisegundosPorPaso = 150;
         let semilla = 0;
         let salir = false;
         return this;
