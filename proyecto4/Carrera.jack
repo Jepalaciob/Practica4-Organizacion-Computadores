@@ -204,14 +204,15 @@ class Carrera {
         return;
     }
 
-    /** Agrega a lo sumo un obstaculo en la columna 31 (seccion 8.4). */
+    /** Agrega a lo sumo un obstaculo en la columna 31 (seccion 8.4). Lo
+        intenta en 3 de cada 10 pasos, en un carril y tipo al azar. */
     method void generar() {
         var int probabilidad, carrilBase, tipo, intento, carril;
         if ((~(estado = 0)) | (~(cantidad < capacidad))) {
             return;
         }
         let probabilidad = azarEntre(10);
-        if (probabilidad > 3) {
+        if (probabilidad > 2) {
             return;
         }
         let carrilBase = azarEntre(3);
@@ -240,31 +241,58 @@ class Carrera {
         return valor - (cociente * limite);
     }
 
-    /** Verifica si la columna 31 esta libre y cumple la regla de paso libre. */
+    /** Verifica si la columna 31 esta libre y, si el tipo es letal, que el
+        carro siga teniendo un carril de escape. */
     method boolean puedeAgregarEn(int tipo, int carril) {
+        var TipoObstaculo datos;
         if (~(ocupada(carril, 31) = -1)) {
             return false;
         }
-        if (tipo < 3) {
-            return puedePonerLetal(carril);
+        let datos = tipos[tipo];
+        if (datos.esLetal()) {
+            return puedePonerLetal(carril, datos.pasoLlegada(31), datos.pasoSalida(31));
         }
         return true;
     }
 
-    /** Verifica que los otros dos carriles no bloqueen el paso en 26..31. */
-    method boolean puedePonerLetal(int carril) {
+    /** Un letal nuevo que tocaria al carro entre los pasos llegada y salida
+        solo se agrega si alguno de los otros dos carriles queda libre. Se
+        deja un margen de 2 pasos para que el carro alcance a cambiar de carril. */
+    method boolean puedePonerLetal(int carril, int llegada, int salida) {
         var int c, bloqueados;
         let c = 0;
         let bloqueados = 0;
         while (c < 3) {
             if (~(c = carril)) {
-                if (tieneLetalEnZona(c)) {
+                if (carrilBloqueado(c, llegada - 2, salida + 2)) {
                     let bloqueados = bloqueados + 1;
                 }
             }
             let c = c + 1;
         }
         return bloqueados < 2;
+    }
+
+    /** Indica si el carril no sirve de escape: tiene un letal entre las
+        columnas 26 y 31 (regla de paso libre del enunciado) o un letal que
+        tocaria al carro en algun paso entre desde y hasta. Revisar los pasos,
+        y no solo las columnas, tiene en cuenta que las motos alcanzan a los
+        demas obstaculos porque avanzan dos celdas por paso. */
+    method boolean carrilBloqueado(int carril, int desde, int hasta) {
+        var int i;
+        var Obstaculo obs;
+        if (tieneLetalEnZona(carril)) {
+            return true;
+        }
+        let i = 0;
+        while (i < cantidad) {
+            let obs = obstaculos[i];
+            if ((obs.carril() = carril) & obs.esLetal() & obs.tocaCarroEntre(desde, hasta)) {
+                return true;
+            }
+            let i = i + 1;
+        }
+        return false;
     }
 
     /** Indica si un carril tiene un obstaculo letal entre las columnas 26 y 31. */

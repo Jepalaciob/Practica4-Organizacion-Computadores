@@ -45,6 +45,19 @@ class TipoObstaculo {
         return puntos;
     }
 
+    /** Primer paso (contando desde el proximo avanzar) en que un obstaculo de
+        este tipo con su celda izquierda en col toca la columna 2 del carro:
+        el primero en que su columna nueva queda en 2 o menos. */
+    method int pasoLlegada(int col) {
+        return ((col - 2) + (velocidad - 1)) / velocidad;
+    }
+
+    /** Ultimo paso en que todavia toca la columna 2 del carro: el ultimo en
+        que su celda derecha, antes de moverse, sigue en la columna 2 o mas. */
+    method int pasoSalida(int col) {
+        return ((col + largo - 3) / velocidad) + 1;
+    }
+
     /** Libera la configuracion de memoria. */
     method void dispose() {
         do Memory.deAlloc(this);

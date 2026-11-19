@@ -61,6 +61,8 @@ Los 4 tipos de obstáculo (`0` cono, `1` camión, `2` moto, `3` moneda) se espec
 
 La presentación también se especializa por datos: `Sprites.deObstaculo(tipo, parte)` elige el dibujo según el tipo del obstáculo y la parte que se dibuja, así el camión de 3 celdas usa una cabina adelante y la carga atrás sin una clase aparte.
 
+Generación de obstáculos: además de la regla de paso libre del enunciado (columnas 26 a 31), `Carrera.generar` revisa en qué pasos tocaría al carro cada obstáculo letal (`Obstaculo.tocaCarroEntre`, calculado con `TipoObstaculo.pasoLlegada` y `pasoSalida`). Un letal nuevo solo se agrega si otro carril queda libre en esos pasos, con 2 pasos de margen para cambiar de carril. Así no se forman muros imposibles, aunque las motos (2 celdas por paso) alcancen a los demás obstáculos.
+
 Flujo de un paso del juego (`Juego.jugarPaso`): `Vista.borrarMovibles` borra el carro y los obstáculos, `Carrera.avanzar` y `Carrera.generar` actualizan la lógica y `Vista.dibujarPaso` vuelve a dibujar solo lo que se mueve. El bucle nunca se detiene a esperar teclas: `Teclado.leerDurante` revisa `Keyboard.keyPressed()` mientras espera con `Sys.wait` el tiempo de cada paso (`milisegundosPorPaso` en `Juego`).
 
 Memoria: cada partida crea su `Carrera` y la libera al terminar; los sprites se crean una sola vez; `Vista.escribir` libera cada cadena literal después de imprimirla, así se pueden jugar muchas partidas seguidas sin agotar el heap.

@@ -50,6 +50,12 @@ class Obstaculo {
         return (~(colCarro < col)) & (~(colCarro > colFinAnterior));
     }
 
+    /** Indica si tocaria al carro, si este estuviera en su carril, en algun
+        paso entre desde y hasta (contando desde el proximo avanzar). */
+    method boolean tocaCarroEntre(int desde, int hasta) {
+        return (~(datos.pasoLlegada(col) > hasta)) & (~(datos.pasoSalida(col) < desde));
+    }
+
     /** Indica si salio completamente por el borde izquierdo de la pantalla. */
     method boolean salio() {
         var int colFin;
