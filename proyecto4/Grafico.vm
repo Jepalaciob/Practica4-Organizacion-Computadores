@@ -1,8 +1,8 @@
 // Grafico.vm - Rutinas graficas escritas a mano en lenguaje VM (secciones 9 y 10).
 // Autor 1: Thomas Serna Saldarriaga
 // Autor 2: Juan Esteban Palacio Betancur
-// No debe existir Grafico.jack. No se permite llamar a Memory.poke,
-// Memory.peek ni Math.multiply.
+// La memoria se lee y escribe solo con pointer/that, y la
+// multiplicacion por 512 se hace con sumas.
 
 // direccionCelda(fila, col): calcula 16384 + fila*512 + col usando sumas.
 //   argument 0 = fila (0..15), argument 1 = col (0..31).
