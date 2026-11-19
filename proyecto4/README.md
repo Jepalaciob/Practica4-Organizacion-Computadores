@@ -6,18 +6,16 @@
 
 | Nombre | Usuario GitHub | Aportes principales |
 |---|---|---|
-| Thomas Serna Saldarriaga | ThomasSerna | Lógica de `Carrera`, modelo de obstáculos (`TipoObstaculo`, `Obstaculo`), `Grafico.dibujarCelda` y `Aleatorio.vm` |
-| Juan Esteban Palacio Betancur | jepalaciob | Configuración del repositorio y estructura inicial; bucle del juego (`Juego`, `Main`), presentación (`Vista`, `Sprites`), lectura del teclado (`Teclado`), `Grafico.borrarCelda` y `Grafico.desplazarFila` |
+| Thomas Serna Saldarriaga | ThomasSerna | Estructura inicial del proyecto, lógica de `Carrera`, modelo de obstáculos (`TipoObstaculo`, `Obstaculo`), `Grafico.dibujarCelda` y `Aleatorio.vm` |
+| Juan Esteban Palacio Betancur | Jepalaciob | Configuración del repositorio; bucle del juego (`Juego`, `Main`), presentación (`Vista`, `Sprites`), lectura del teclado (`Teclado`), `Grafico.borrarCelda` y `Grafico.desplazarFila` |
 
 # Compilación y ejecución
-
-<!-- Pasos exactos para compilar con JackCompiler y ejecutar en el VMEmulator. -->
 
 1. Compilar la carpeta `proyecto4/` con el compilador oficial de Nand2Tetris (`tools/`):
    - Windows: `tools/JackCompiler.bat RUTA/proyecto4`
    - Linux/macOS: `tools/JackCompiler.sh RUTA/proyecto4`
 2. Abrir el **VM Emulator** (`tools/VMEmulator.bat` o `VMEmulator.sh`).
-3. Ir a `File -> Load Program` y seleccionar la carpeta `proyecto4/`.
+3. Ir a `File -> Load Program` y seleccionar la carpeta `proyecto4/`. Si el emulador pregunta si usa sus implementaciones incorporadas de las funciones del sistema operativo, responder `Yes`.
 4. Seleccionar `No animation` y velocidad máxima, presionar `Run` y hacer clic sobre la pantalla del emulador para capturar el teclado.
 5. En la pantalla inicial elegir la distancia a la meta con `1`, `2` o `3`.
 
@@ -34,10 +32,6 @@ Las pruebas públicas se corren desde Git Bash con `./correr_pruebas.sh RUTA/pro
 | `ESC` | Salir del juego |
 
 # Diseño de clases
-
-<!-- Tabla con cada clase y su responsabilidad. Explique cómo especializan
-     los tipos de obstáculo sin herencia y por qué la lógica no depende de
-     la pantalla ni del teclado. -->
 
 | Clase | Responsabilidad |
 |---|---|
@@ -69,9 +63,6 @@ Memoria: cada partida crea su `Carrera` y la libera al terminar; los sprites se 
 
 # Rutinas VM
 
-<!-- Funciones escritas a mano en VM (Grafico.dibujarCelda y las de
-     bonificación que hayan hecho) y dónde las usa el juego. -->
-
 Todas están escritas a mano en `Grafico.vm` y `Aleatorio.vm`. Leen y escriben la memoria con `pointer`/`that` y multiplican por 512 con sumas (sin `Memory.poke`, `Memory.peek` ni `Math.multiply`).
 
 | Función | Qué hace | Dónde la usa el juego |
@@ -84,5 +75,10 @@ Todas están escritas a mano en `Grafico.vm` y `Aleatorio.vm`. Leen y escriben l
 
 # Uso de IA
 
-<!-- Herramienta, para qué la usaron y en qué partes del código; o la frase
-     "No se usó IA". -->
+Durante el desarrollo del proyecto utilizamos **ChatGPT** y **Claude** como herramientas de apoyo, con tres propósitos principales:
+
+- **Como guía:** para resolver dudas sobre Jack, el lenguaje VM y el enunciado, y para orientarnos en el diseño de las clases y en la escritura del código.
+- **Para verificar el funcionamiento:** para comprobar que el juego y las rutinas VM se comportaran como esperábamos y cumplieran los requisitos y las pruebas del proyecto.
+- **Para mejorar la calidad del código:** para aplicar buenas prácticas de clean code, de modo que el código quedara claro, legible y fácil de mantener.
+
+Las usamos en el código del juego (Jack y VM), en las pruebas y en la documentación. Todo lo que obtuvimos con su ayuda lo revisamos, lo probamos en el VM Emulator y lo ajustamos antes de incluirlo en el proyecto, con el fin de entender y poder explicar cada una de sus partes.
