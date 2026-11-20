@@ -75,10 +75,11 @@ Todas están escritas a mano en `Grafico.vm` y `Aleatorio.vm`. Leen y escriben l
 
 # Uso de IA
 
-Durante el desarrollo del proyecto utilizamos **ChatGPT** y **Claude** como herramientas de apoyo, con tres propósitos principales:
+Durante el desarrollo del proyecto utilizamos **ChatGPT** y **Claude** como herramientas de apoyo, con cuatro propósitos principales:
 
 - **Como guía:** para resolver dudas sobre Jack, el lenguaje VM y el enunciado, y para orientarnos en el diseño de las clases y en la escritura del código.
 - **Para verificar el funcionamiento:** para comprobar que el juego y las rutinas VM se comportaran como esperábamos y cumplieran los requisitos y las pruebas del proyecto.
 - **Para mejorar la calidad del código:** para aplicar buenas prácticas de clean code, de modo que el código quedara claro, legible y fácil de mantener.
+- **Para los sprites y los comentarios:** para diseñar los dibujos de 16 × 16 píxeles del carro, los obstáculos, la vía y la barra de progreso (`Sprites`), y para redactar los comentarios del código.
 
 Las usamos en el código del juego (Jack y VM), en las pruebas y en la documentación. Todo lo que obtuvimos con su ayuda lo revisamos, lo probamos en el VM Emulator y lo ajustamos antes de incluirlo en el proyecto, con el fin de entender y poder explicar cada una de sus partes.
